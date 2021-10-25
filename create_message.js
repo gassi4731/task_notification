@@ -51,12 +51,3 @@ function createField(fallback, taskTitle, taskDeadline, taskType, taskURL, class
 
   return message;
 }
-
-// ●課題に関する内容
-// 課題タイトル taskTitle
-// 受付終了日時 taskDeadline
-// タイプ: 小テスト・アンケート・レポート taskType
-// 課題のURL taskURL
-
-// ●授業
-// 授業名 className
