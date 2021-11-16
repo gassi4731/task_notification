@@ -2,30 +2,38 @@ var trelloKey   = PropertiesService.getScriptProperties().getProperty('TRELLO_KE
 var trelloToken = PropertiesService.getScriptProperties().getProperty('TRELLO_TOKEN');
 var boardId = PropertiesService.getScriptProperties().getProperty('TRELLO_BOARD_ID');
 var listId　= PropertiesService.getScriptProperties().getProperty('TRELLO_LIST_ID');
+var taskTypeText = ['小テスト', 'アンケート', 'レポート'];
 
 function trelloAction(tasks) {
-  const newTasks = [].concat(tasks);
   const registeredTasks = JSON.parse(trelloGetCard());
 
   // 既存のカードと被りがないか確認
-  for(var i=0; i<newTasks.length; i++) {
-    const newTask = newTasks[i];
-    const name = '【課題】' + newTask.title;
-    const desc = newTask.url + '  ' + newTask.className;
+  tasks.forEach(function(task){
+    Logger.log(task);
+    const taskName = '【' + taskTypeText[task.type] + '】' + task.title.replace("#","");
+    const taskDesc = task.url + '  ' + task.className;
     var okFlag = true;
 
-    for(var j=0; j<registeredTasks.length; j++) {
-      const registeredTask = registeredTasks[j];
-      if(name == registeredTask.name && desc == registeredTask.desc) {
+    registeredTasks.some(function(registeredTask){
+      if(taskName == registeredTask.name && taskDesc == registeredTask.desc) {
         okFlag = false;
-        break
+        return true
       }
-    }
+    });
+    var taskDue = new Date(task.deadline);
+    taskDue.setHours(taskDue.getHours() - 9);
     if (okFlag) {
+      const cardContent = {
+        'name': taskName,
+        'desc': taskDesc,
+        'due': taskDue,
+        'pos': 'top'
+      }
+
       // カードを追加
-      trelloAddCard(newTask.title, new Date(newTask.deadline), newTask.url, newTask.className)
+      trelloAddCard(cardContent);
     }
-  }
+  });
   Logger.log('Success: Trello Action')
 }
 
@@ -44,19 +52,8 @@ function trelloGetCard() {
 }
 
 // カードを追加する
-function trelloAddCard(taskTitle, taskDeadline, taskURL, className) {
-  var cardName = '【課題】' + taskTitle;
-  var cardDesc = taskURL + '  ' + className;
-  var cardPos = "top";
-  var cardDue = taskDeadline.setHours(taskDeadline.getHours());
-
-  var url = "https://trello.com/1/cards?key=" + trelloKey 
-    + "&token=" + trelloToken 
-    + "&idList=" + listId
-    + "&name=" + cardName
-    + "&desc=" + cardDesc
-    + '&due=' + cardDue
-    + '&pos=' + cardPos
-  res = UrlFetchApp.fetch(url, {'method':'post'});
-  Logger.log(res);
+function trelloAddCard(cardContent) {
+  const url = 'https://trello.com/1/cards?pos=top&key=' + trelloKey + "&idList=" + listId + "&token=" + trelloToken + '&due=' + cardContent.due + "&desc=" + cardContent.desc + "&name=" + cardContent.name;
+  Logger.log(url);
+  UrlFetchApp.fetch(url, {'method':'post'});
 }
