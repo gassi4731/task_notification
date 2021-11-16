@@ -1,8 +1,8 @@
 var userId = PropertiesService.getScriptProperties().getProperty('SLACK_USER_ID'); // SlackのメンションするユーザーID
 var youbiText = ["日", "月", "火", "水", "木", "金", "土"];
-let priorityText = ['danger', 'warning', '#898989'];
-let taskTypeText = ['小テスト', 'アンケート', 'レポート'];
-let pretextFlag = true;
+var priorityText = ['danger', 'warning', '#898989'];
+var taskTypeText = ['小テスト', 'アンケート', 'レポート'];
+var pretextFlag = true;
 
 function createFallback(tasks){
   var text = '';
@@ -34,7 +34,7 @@ function createFallback(tasks){
 }
 
 function createField(fallback, taskTitle, taskDeadline, taskType, taskURL, className) {
-  var deadLineText = Utilities.formatDate(taskDeadline, 'Asia/Tokyo', 'yyyy/MM/dd') + "(" + youbiText[taskDeadline.getDay()] + ")";
+  var deadLineText = Utilities.formatDate(taskDeadline, 'Asia/Tokyo', 'yyyy/MM/dd') + "(" + youbiText[taskDeadline.getDay()] + ") " + Utilities.formatDate(taskDeadline, 'Asia/Tokyo', 'HH:mm')
 
   var message = {
     "fallback": fallback,
@@ -51,3 +51,12 @@ function createField(fallback, taskTitle, taskDeadline, taskType, taskURL, class
 
   return message;
 }
+
+// ●課題に関する内容
+// 課題タイトル taskTitle
+// 受付終了日時 taskDeadline
+// タイプ: 小テスト・アンケート・レポート taskType
+// 課題のURL taskURL
+
+// ●授業
+// 授業名 className
